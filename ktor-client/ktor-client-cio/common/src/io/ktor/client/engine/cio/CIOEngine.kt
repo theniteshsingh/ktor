@@ -11,22 +11,27 @@ import io.ktor.client.utils.*
 import io.ktor.http.*
 import io.ktor.network.selector.*
 import io.ktor.util.*
+import io.ktor.network.util.*
+import io.ktor.util.*
+import io.ktor.util.collections.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
-import java.io.*
-import java.net.*
-import java.util.concurrent.*
 import kotlin.coroutines.*
 
-internal class CIOEngine(override val config: CIOEngineConfig) : HttpClientEngineBase("ktor-cio") {
+internal class CIOEngine(
+    override val config: CIOEngineConfig
+) : HttpClientEngineBase("ktor-cio") {
+    init {
+        preventFreeze()
+    }
 
     override val dispatcher by lazy { Dispatchers.clientDispatcher(config.threadsCount, "ktor-cio-dispatcher") }
 
     override val supportedCapabilities = setOf(HttpTimeout)
 
-    private val endpoints = ConcurrentHashMap<String, Endpoint>()
+    private val endpoints = ConcurrentMap<String, Endpoint>()
 
-    private val selectorManager = ActorSelectorManager(dispatcher)
+    private val selectorManager: SelectorManager by lazy { SelectorManager(dispatcher) }
 
     private val connectionFactory = ConnectionFactory(selectorManager, config.maxConnectionsCount)
 
@@ -49,10 +54,10 @@ internal class CIOEngine(override val config: CIOEngineConfig) : HttpClientEngin
         }
     }
 
-    private val proxy = when (val type = config.proxy?.type()) {
-        Proxy.Type.DIRECT,
+    private val proxy: ProxyConfig? = when (val type = config.proxy?.type) {
+        ProxyType.SOCKS,
         null -> null
-        Proxy.Type.HTTP -> config.proxy
+        ProxyType.HTTP -> config.proxy
         else -> throw IllegalStateException("Proxy of type $type is unsupported by CIO engine.")
     }
 
@@ -88,8 +93,8 @@ internal class CIOEngine(override val config: CIOEngineConfig) : HttpClientEngin
         val protocol: URLProtocol = url.protocol
 
         if (proxy != null) {
-            val proxyAddress = proxy.address() as InetSocketAddress
-            host = proxyAddress.hostName
+            val proxyAddress = proxy.resolveAddress()
+            host = proxyAddress.hostname
             port = proxyAddress.port
         } else {
             host = url.host
@@ -98,7 +103,7 @@ internal class CIOEngine(override val config: CIOEngineConfig) : HttpClientEngin
 
         val endpointId = "$host:$port:$protocol"
 
-        return endpoints.computeIfAbsentWeak(endpointId) {
+        return endpoints.computeIfAbsent(endpointId) {
             val secure = (protocol.isSecure())
             Endpoint(
                 host, port, proxy != null, secure,
@@ -113,16 +118,3 @@ internal class CIOEngine(override val config: CIOEngineConfig) : HttpClientEngin
 @Suppress("KDocMissingDocumentation")
 @Deprecated("Use ClientEngineClosedException instead", replaceWith = ReplaceWith("ClientEngineClosedException"))
 class ClientClosedException(cause: Throwable? = null) : IllegalStateException("Client already closed", cause)
-
-private fun <K : Any, V : Closeable> ConcurrentHashMap<K, V>.computeIfAbsentWeak(key: K, block: (K) -> V): V {
-    get(key)?.let { return it }
-
-    val newValue = block(key)
-    val result = putIfAbsent(key, newValue)
-    if (result != null) {
-        newValue.close()
-        return result
-    }
-
-    return newValue
-}
