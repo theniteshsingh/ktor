@@ -24,7 +24,7 @@ import kotlin.reflect.jvm.*
  * using [Locations.href].
  */
 @KtorExperimentalLocationsAPI
-open class Locations(private val application: Application, private val routeService: LocationRouteService) {
+public open class Locations(private val application: Application, private val routeService: LocationRouteService) {
     private val conversionService: ConversionService get() = application.conversionService
     private val rootUri = ResolvedUriInfo("", emptyList())
     private val info = hashMapOf<KClass<*>, LocationInfo>()
@@ -62,8 +62,7 @@ open class Locations(private val application: Application, private val routeServ
     }
 
     private fun createFromParameters(parameters: Parameters, name: String, type: Type, optional: Boolean): Any? {
-        val values = parameters.getAll(name)
-        return when (values) {
+        return when (val values = parameters.getAll(name)) {
             null -> when {
                 !optional -> {
                     throw MissingRequestParameterException(name)
@@ -160,7 +159,7 @@ open class Locations(private val application: Application, private val routeServ
      * Resolves parameters in a [call] to an instance of specified [locationClass].
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> resolve(locationClass: KClass<*>, call: ApplicationCall): T {
+    public fun <T : Any> resolve(locationClass: KClass<*>, call: ApplicationCall): T {
         return resolve(locationClass, call.parameters)
     }
 
@@ -168,7 +167,7 @@ open class Locations(private val application: Application, private val routeServ
      * Resolves [parameters] to an instance of specified [locationClass].
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> resolve(locationClass: KClass<*>, parameters: Parameters): T {
+    public fun <T : Any> resolve(locationClass: KClass<*>, parameters: Parameters): T {
         return getOrCreateInfo(locationClass).create(parameters) as T
     }
 
@@ -183,13 +182,13 @@ open class Locations(private val application: Application, private val routeServ
             return conversionService.toValues(value)
         }
 
-        val substituteParts = RoutingPath.parse(info.path).parts.flatMap { it ->
-            when (it.kind) {
-                RoutingPathSegmentKind.Constant -> listOf(it.value)
+        val substituteParts = RoutingPath.parse(info.path).parts.flatMap { segment ->
+            when (segment.kind) {
+                RoutingPathSegmentKind.Constant -> listOf(segment.value)
                 RoutingPathSegmentKind.Parameter -> {
                     if (info.klass.objectInstance != null)
-                        throw IllegalArgumentException("There is no place to bind ${it.value} in object for '${info.klass}'")
-                    propertyValue(location, PathSegmentSelectorBuilder.parseName(it.value))
+                        throw IllegalArgumentException("There is no place to bind ${segment.value} in object for '${info.klass}'")
+                    propertyValue(location, PathSegmentSelectorBuilder.parseName(segment.value))
                 }
             }
         }
@@ -221,7 +220,7 @@ open class Locations(private val application: Application, private val routeServ
      * The class of [location] instance **must** be annotated with [Location].
      */
     @UseExperimental(ImplicitReflectionSerializer::class)
-    fun href(location: Any): String {
+    public fun href(location: Any): String {
         val serializer = location.javaClass.kotlin.serializer()
         val encoder = URLEncoder(EmptyModule, conversionService)
 
@@ -246,7 +245,7 @@ open class Locations(private val application: Application, private val routeServ
     /**
      * Creates all necessary routing entries to match specified [locationClass].
      */
-    fun createEntry(parent: Route, locationClass: KClass<*>): Route {
+    public fun createEntry(parent: Route, locationClass: KClass<*>): Route {
         val info = getOrCreateInfo(locationClass)
         val pathRoute = createEntry(parent, info)
 
@@ -262,18 +261,18 @@ open class Locations(private val application: Application, private val routeServ
     /**
      * Configuration for [Locations].
      */
-    class Configuration {
+    public class Configuration {
         /**
          * Specifies an alternative routing service. Default is [LocationAttributeRouteService].
          */
-        var routeService: LocationRouteService? = null
+        public var routeService: LocationRouteService? = null
     }
 
     /**
      * Installable feature for [Locations].
      */
     @KtorExperimentalLocationsAPI
-    companion object Feature : ApplicationFeature<Application, Configuration, Locations> {
+    public companion object Feature : ApplicationFeature<Application, Configuration, Locations> {
         override val key: AttributeKey<Locations> = AttributeKey("Locations")
 
         override fun install(pipeline: Application, configure: Configuration.() -> Unit): Locations {
@@ -288,19 +287,19 @@ open class Locations(private val application: Application, private val routeServ
  * Provides services for extracting routing information from a location class.
  */
 @KtorExperimentalLocationsAPI
-interface LocationRouteService {
+public interface LocationRouteService {
     /**
      * Retrieves routing information from a given [locationClass].
      * @return routing pattern, or null if a given class doesn't represent a route.
      */
-    fun findRoute(locationClass: KClass<*>): String?
+    public fun findRoute(locationClass: KClass<*>): String?
 }
 
 /**
  * Implements [LocationRouteService] by extracting routing information from a [Location] annotation.
  */
 @KtorExperimentalLocationsAPI
-class LocationAttributeRouteService : LocationRouteService {
+public class LocationAttributeRouteService : LocationRouteService {
     private inline fun <reified T : Annotation> KAnnotatedElement.annotation(): T? {
         return annotations.singleOrNull { it.annotationClass == T::class } as T?
     }
@@ -312,4 +311,4 @@ class LocationAttributeRouteService : LocationRouteService {
  * Exception indicating that route parameters in curly brackets do not match class properties.
  */
 @KtorExperimentalLocationsAPI
-class LocationRoutingException(message: String) : Exception(message)
+public class LocationRoutingException(message: String) : Exception(message)
