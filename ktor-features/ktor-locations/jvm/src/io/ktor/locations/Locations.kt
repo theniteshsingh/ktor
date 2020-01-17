@@ -9,6 +9,8 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.util.*
+import kotlinx.serialization.*
+import kotlinx.serialization.modules.*
 import java.lang.reflect.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
@@ -218,12 +220,14 @@ open class Locations(private val application: Application, private val routeServ
      *
      * The class of [location] instance **must** be annotated with [Location].
      */
+    @UseExperimental(ImplicitReflectionSerializer::class)
     fun href(location: Any): String {
-        val info = pathAndQuery(location)
-        return info.path + if (info.query.any())
-            "?" + info.query.formUrlEncode()
-        else
-            ""
+        val serializer = location.javaClass.kotlin.serializer()
+        val encoder = URLEncoder(EmptyModule, conversionService)
+
+        serializer.serialize(encoder, location)
+
+        return encoder.build().fullPath
     }
 
     internal fun href(location: Any, builder: URLBuilder) {
