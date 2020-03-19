@@ -2,6 +2,8 @@
  * Copyright 2014-2020 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
+val android_stetho_version: String by project.extra
+
 val experimentalAnnotations = listOf(
     "kotlin.RequiresOptIn",
     "kotlin.ExperimentalUnsignedTypes",
@@ -35,7 +37,7 @@ kotlin {
             dependencies {
                 implementation(project(":ktor-client:ktor-client-features:ktor-client-tracing"))
                 implementation(project(":ktor-client:ktor-client-core"))
-                implementation("com.facebook.stetho:stetho:1.5.1")
+                implementation("com.facebook.stetho:stetho:$android_stetho_version")
             }
         }
 
