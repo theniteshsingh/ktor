@@ -40,13 +40,6 @@ kotlin {
                 implementation("com.facebook.stetho:stetho:$android_stetho_version")
             }
         }
-
-        val androidTest by getting {
-            dependencies {
-                api("org.jetbrains.kotlin:kotlin-test:1.3.61")
-                api("junit:junit:4.12")
-            }
-        }
     }
 
     sourceSets.all {
