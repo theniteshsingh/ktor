@@ -7,14 +7,13 @@ package io.ktor.client.features.tracing
 import com.facebook.stetho.inspector.network.*
 import io.ktor.http.cio.websocket.*
 
-class KtorInspectorWebSocketFrame(private val requestId: String, private val frame: Frame) :
+internal class KtorInspectorWebSocketFrame(private val requestId: String, private val frame: Frame) :
     NetworkEventReporter.InspectorWebSocketFrame {
     override fun requestId(): String {
         return requestId
     }
 
     override fun mask(): Boolean {
-        // TODO: Figure out what mask means.
         return false
     }
 

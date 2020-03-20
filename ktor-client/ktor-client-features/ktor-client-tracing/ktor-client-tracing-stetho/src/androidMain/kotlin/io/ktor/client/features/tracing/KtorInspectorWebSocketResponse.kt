@@ -3,7 +3,7 @@ package io.ktor.client.features.tracing
 import com.facebook.stetho.inspector.network.*
 import io.ktor.client.request.*
 
-class KtorInspectorWebSocketResponse(
+internal class KtorInspectorWebSocketResponse(
     private val requestId: String,
     private val requestData: HttpRequestData,
     private val responseData: HttpResponseData
