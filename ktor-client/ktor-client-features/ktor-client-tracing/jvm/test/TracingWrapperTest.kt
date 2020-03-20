@@ -70,6 +70,7 @@ class TracingWrapperTest {
                 channel.send(Frame.Text("Text1"))
                 channel.send(Frame.Text("Text2"))
                 channel.send(Frame.Text("Text3"))
+                channel.close()
             }
 
             for (frame in channelTracer) {
@@ -99,6 +100,7 @@ class TracingWrapperTest {
             val deferred = async { channel.send(Frame.Text("Text")) }
 
             while (channelTracer.poll() == null) {
+                yield()
             }
 
             deferred.await()
