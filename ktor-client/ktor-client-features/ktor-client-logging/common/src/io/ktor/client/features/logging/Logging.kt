@@ -39,6 +39,7 @@ class Logging(
          * filters
          */
         internal var filters = mutableListOf<(HttpRequestBuilder) -> Boolean>()
+
         /**
          * [Logger] instance to use
          */
@@ -100,14 +101,14 @@ class Logging(
     ) {
         with(logger) {
             log("COMMON HEADERS")
-            requestHeaders.forEach { (key, values) ->
+            requestHeaders.toList().sortedBy { it.key }.forEach { (key, values) ->
                 log("-> $key: ${values.joinToString("; ")}")
             }
 
             contentHeaders ?: return@with
 
             log("CONTENT HEADERS")
-            contentHeaders.forEach { key, values ->
+            contentHeaders.entries().toList().sortedBy { it.key }.forEach { (key, values) ->
                 log("-> $key: ${values.joinToString("; ")}")
             }
         }
@@ -169,7 +170,7 @@ class Logging(
                 }
             }
 
-            scope.responsePipeline.intercept(HttpResponsePipeline.Receive) {
+            scope.receivePipeline.intercept(HttpReceivePipeline.State) {
                 try {
                     feature.logResponse(context.response)
                     proceedWith(subject)

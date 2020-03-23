@@ -1,6 +1,8 @@
 /*
- * Copyright 2014-2019 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2014-2020 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
+
+package io.ktor.client.tests
 
 import io.ktor.client.call.*
 import io.ktor.client.engine.mock.*
@@ -13,12 +15,22 @@ import io.ktor.http.*
 import io.ktor.utils.io.core.*
 import kotlin.test.*
 
-
-class CommonLoggingTest {
-
+class LoggingMockedTests {
     @Test
     fun testLogRequestWithException() = testWithEngine(MockEngine) {
-        val testLogger = TestLogger()
+        val testLogger = TestLogger(
+            "REQUEST: http://localhost/",
+            "METHOD: HttpMethod(value=GET)",
+            "COMMON HEADERS",
+            "-> Accept: */*",
+            "-> Accept-Charset: UTF-8",
+            "CONTENT HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END",
+            "REQUEST http://localhost/ failed with exception: io.ktor.client.tests.utils.CustomError: BAD REQUEST"
+        )
 
         config {
             engine {
@@ -41,16 +53,32 @@ class CommonLoggingTest {
             }
 
             assertTrue(failed, "Exception is missing.")
+        }
 
-            /**
-             * Note: no way to join logger context => unpredictable logger output.
-             */
+        after {
+            testLogger.verify()
         }
     }
 
     @Test
     fun testLogResponseWithException() = testWithEngine(MockEngine) {
-        val testLogger = TestLogger()
+        val testLogger = TestLogger(
+            "REQUEST: http://localhost/",
+            "METHOD: HttpMethod(value=GET)",
+            "COMMON HEADERS",
+            "-> Accept-Charset: UTF-8",
+            "-> Accept: */*",
+            "CONTENT HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END",
+            "RESPONSE: 200 OK",
+            "METHOD: HttpMethod(value=GET)",
+            "FROM: http://localhost/",
+            "COMMON HEADERS",
+            "RESPONSE http://localhost/ failed with exception: io.ktor.client.tests.utils.CustomError: PARSE ERROR"
+        )
 
         config {
             engine {
@@ -81,18 +109,45 @@ class CommonLoggingTest {
             }
 
             assertTrue(failed, "Exception is missing.")
+        }
 
-            val dump = testLogger.dump()
-            assertTrue(
-                dump.contains("RESPONSE http://localhost/ failed with exception: CustomError: PARSE ERROR"),
-                dump
-            )
+        after {
+            testLogger.verify()
         }
     }
 
     @Test
     fun testLoggingWithForm() = testWithEngine(MockEngine) {
-        val testLogger = TestLogger()
+        val testLogger = TestLogger(
+            "REQUEST: http://localhost/",
+            "METHOD: HttpMethod(value=POST)",
+            "COMMON HEADERS",
+            "-> Accept: */*",
+            "-> Accept-Charset: UTF-8",
+            "CONTENT HEADERS",
+            "!!! BODY Content-Type: multipart/form-data; boundary=41a55fb5-2ae7bc4b-5b124e524086ca1e-6879a99a75b8a0a028a6a7d7-63d38251-5",
+            "BODY START",
+            """!!!
+                
+
+                --41a55fb5-2ae7bc4b-5b124e524086ca1e-6879a99a75b8a0a028a6a7d7-63d38251-5
+                Content-Disposition: form-data; name=file; file; name=""; filename=""
+
+                Hello
+                --41a55fb5-2ae7bc4b-5b124e524086ca1e-6879a99a75b8a0a028a6a7d7-63d38251-5--
+
+
+            """.trimIndent(),
+            "BODY END",
+            "RESPONSE: 200 OK",
+            "METHOD: HttpMethod(value=POST)",
+            "FROM: http://localhost/",
+            "COMMON HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END"
+        )
 
         config {
             engine {
@@ -124,15 +179,39 @@ class CommonLoggingTest {
                     ) { input }
                 }
             )
+        }
 
-            val dump = testLogger.dump()
-            assertTrue { dump.contains("Hello") }
+        after {
+            testLogger.verify()
         }
     }
 
     @Test
     fun testFilterRequest() = testWithEngine(MockEngine) {
-        val testLogger = TestLogger()
+        val testLogger = TestLogger(
+            "REQUEST: http://somewhere/filtered_path",
+            "METHOD: HttpMethod(value=GET)",
+            "COMMON HEADERS",
+            "-> Accept: */*",
+            "-> Accept-Charset: UTF-8",
+            "CONTENT HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END",
+            "RESPONSE: 200 OK",
+            "METHOD: HttpMethod(value=GET)",
+            "FROM: http://somewhere/filtered_path",
+            "COMMON HEADERS",
+            "RESPONSE: 200 OK",
+            "METHOD: HttpMethod(value=GET)",
+            "FROM: http://somewhere/not_filtered_path",
+            "COMMON HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END"
+        )
 
         config {
             engine {
@@ -148,12 +227,10 @@ class CommonLoggingTest {
         test { client ->
             client.get<String>(urlString = "http://somewhere/filtered_path")
             client.get<String>(urlString = "http://somewhere/not_filtered_path")
+        }
 
-            val dump = testLogger.dump()
-            assertTrue { dump.contains("REQUEST: http://somewhere/filtered_path") }
-            assertFalse { dump.contains("REQUEST: http://somewhere/not_filtered_path") }
+        after {
+            testLogger.verify()
         }
     }
 }
-
-internal class CustomError(override val message: String) : Throwable()
