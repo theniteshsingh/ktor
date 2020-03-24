@@ -66,8 +66,8 @@ class LoggingMockedTests {
             "REQUEST: http://localhost/",
             "METHOD: HttpMethod(value=GET)",
             "COMMON HEADERS",
-            "-> Accept-Charset: UTF-8",
             "-> Accept: */*",
+            "-> Accept-Charset: UTF-8",
             "CONTENT HEADERS",
             "BODY Content-Type: null",
             "BODY START",
@@ -77,6 +77,10 @@ class LoggingMockedTests {
             "METHOD: HttpMethod(value=GET)",
             "FROM: http://localhost/",
             "COMMON HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "Hello",
+            "BODY END",
             "RESPONSE http://localhost/ failed with exception: io.ktor.client.tests.utils.CustomError: PARSE ERROR"
         )
 
@@ -106,6 +110,61 @@ class LoggingMockedTests {
                 } catch (_: CustomError) {
                     failed = true
                 }
+            }
+
+            assertTrue(failed, "Exception is missing.")
+        }
+
+        after {
+            testLogger.verify()
+        }
+    }
+
+    @Test
+    fun testLogResponseWithExceptionSingle() = testWithEngine(MockEngine) {
+        val testLogger = TestLogger(
+            "REQUEST: http://localhost/",
+            "METHOD: HttpMethod(value=GET)",
+            "COMMON HEADERS",
+            "-> Accept: */*",
+            "-> Accept-Charset: UTF-8",
+            "CONTENT HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END",
+            "RESPONSE: 200 OK",
+            "METHOD: HttpMethod(value=GET)",
+            "FROM: http://localhost/",
+            "COMMON HEADERS",
+            "RESPONSE http://localhost/ failed with exception: io.ktor.client.tests.utils.CustomError: PARSE ERROR",
+            "REQUEST http://localhost/ failed with exception: io.ktor.client.tests.utils.CustomError: PARSE ERROR"
+        )
+
+        config {
+            engine {
+                addHandler { request ->
+                    respondOk("Hello")
+                }
+            }
+            install("BadInterceptor") {
+                receivePipeline.intercept(HttpReceivePipeline.State) {
+                    throw CustomError("PARSE ERROR")
+                }
+            }
+
+            install(Logging) {
+                level = LogLevel.ALL
+                logger = testLogger
+            }
+        }
+
+        test { client ->
+            var failed = false
+            try {
+                client.get<String>()
+            } catch (_: CustomError) {
+                failed = true
             }
 
             assertTrue(failed, "Exception is missing.")
@@ -203,6 +262,10 @@ class LoggingMockedTests {
             "METHOD: HttpMethod(value=GET)",
             "FROM: http://somewhere/filtered_path",
             "COMMON HEADERS",
+            "BODY Content-Type: null",
+            "BODY START",
+            "",
+            "BODY END",
             "RESPONSE: 200 OK",
             "METHOD: HttpMethod(value=GET)",
             "FROM: http://somewhere/not_filtered_path",

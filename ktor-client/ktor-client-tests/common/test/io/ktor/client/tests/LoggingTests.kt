@@ -144,7 +144,7 @@ class LoggingTest : ClientLoader() {
             "-> content-type: text/plain; charset=UTF-8",
             "BODY Content-Type: text/plain; charset=UTF-8",
             "BODY START",
-            "",
+            "/",
             "BODY END"
         )
 
@@ -250,7 +250,7 @@ class LoggingTest : ClientLoader() {
     }
 
     @Test
-    fun customServerHeadersLoggingTest() = clientTests {
+    fun customServerHeadersLoggingTest() = clientTests("Curl", "iOS") {
         val testLogger = TestLogger(
             "REQUEST: http://google.com/",
             "METHOD: HttpMethod(value=GET)",
@@ -281,7 +281,7 @@ class LoggingTest : ClientLoader() {
             "METHOD: HttpMethod(value=GET)",
             "FROM: http://www.google.com/",
             "COMMON HEADERS",
-            "!!!-> Accept-Ranges: none",
+            "???-> Accept-Ranges: none",
             "???-> Cache-Control: private, max-age=0",
             "???-> Content-Encoding: gzip",
             "???-> Content-Length: 6442",
