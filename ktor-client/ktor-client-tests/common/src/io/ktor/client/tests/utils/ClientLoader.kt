@@ -5,6 +5,7 @@
 package io.ktor.client.tests.utils
 
 import io.ktor.client.engine.*
+import kotlin.jvm.*
 
 /**
  * Helper interface to test client.
@@ -22,14 +23,4 @@ expect abstract class ClientLoader() {
      * Print coroutines in debug mode.
      */
     fun dumpCoroutines()
-}
-
-/**
- * Perform test against all clients from dependencies.
- */
-fun ClientLoader.clientTests(
-    vararg skipEngines: String,
-    block: suspend TestClientBuilder<HttpClientEngineConfig>.() -> Unit
-) {
-    clientTests(skipEngines.toList(), block)
 }

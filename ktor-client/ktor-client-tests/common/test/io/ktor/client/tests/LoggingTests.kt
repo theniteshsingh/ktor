@@ -250,7 +250,7 @@ class LoggingTest : ClientLoader() {
     }
 
     @Test
-    fun customServerHeadersLoggingTest() = clientTests("Curl", "iOS") {
+    fun customServerHeadersLoggingTest() = clientTests(listOf("Curl", "iOS")) {
         val testLogger = TestLogger(
             "REQUEST: http://google.com/",
             "METHOD: HttpMethod(value=GET)",
