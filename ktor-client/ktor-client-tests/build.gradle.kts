@@ -116,7 +116,7 @@ if (!ideaActive) {
     testTasks += listOf(
         "macosX64Test",
         "linuxX64Test",
-        "iosTest",
+        "iosX64Test",
         "mingwX64Test",
         "jsNodeTest",
         "jsBrowserTest"
