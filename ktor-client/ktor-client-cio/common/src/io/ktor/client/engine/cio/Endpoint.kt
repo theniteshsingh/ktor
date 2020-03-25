@@ -14,10 +14,6 @@ import io.ktor.util.date.*
 import io.ktor.utils.io.core.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import java.io.*
-import java.net.*
-import java.nio.channels.*
 import kotlinx.coroutines.channels.*
 import kotlin.coroutines.*
 
@@ -102,8 +98,8 @@ internal class Endpoint(
     ): Deferred<HttpResponseData> = async(callContext + CoroutineName("DedicatedRequest")) {
         try {
             val connection = connect(request)
-            val input = this@Endpoint.mapEngineExceptions(connection.openReadChannel())
-            val originOutput = this@Endpoint.mapEngineExceptions(connection.openWriteChannel())
+            val input = this@Endpoint.mapEngineExceptions(connection.openReadChannel(), request)
+            val originOutput = this@Endpoint.mapEngineExceptions(connection.openWriteChannel(), request)
             val output = originOutput.handleHalfClosed(
                 callContext, config.endpoint.allowHalfClose
             )
@@ -134,12 +130,7 @@ internal class Endpoint(
 
             return@async responseData
         } catch (cause: Throwable) {
-            val mappedException = when (cause.rootCause) {
-                is java.net.SocketTimeoutException -> SocketTimeoutException(request, cause)
-                else -> cause
-            }
-
-            throw mappedException
+            throw cause.mapToKtor(request)
         }
     }
 
@@ -254,3 +245,5 @@ open class ConnectException : Exception("Connect timed out or retry attempts exc
 @Suppress("KDocMissingDocumentation")
 @KtorExperimentalAPI
 class FailToConnectException : Exception("Connect timed out or retry attempts exceeded")
+
+internal expect fun Throwable.mapToKtor(request: HttpRequestData): Throwable

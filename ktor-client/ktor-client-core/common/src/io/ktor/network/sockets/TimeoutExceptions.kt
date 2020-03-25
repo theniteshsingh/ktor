@@ -4,7 +4,12 @@
 
 package io.ktor.network.sockets
 
+import io.ktor.client.features.*
+import io.ktor.client.request.*
+import io.ktor.util.*
+import io.ktor.utils.io.*
 import io.ktor.utils.io.errors.*
+import kotlinx.coroutines.*
 
 /**
  * This exception is thrown in case connect timeout exceeded.
@@ -16,3 +21,46 @@ expect class ConnectTimeoutException(message: String, cause: Throwable? = null) 
  */
 expect class SocketTimeoutException(message: String, cause: Throwable? = null) : IOException
 
+/**
+ * Returns [ByteReadChannel] with [ByteChannel.close] handler that returns [SocketTimeoutException] instead of
+ * [SocketTimeoutException].
+ */
+@InternalAPI
+fun CoroutineScope.mapEngineExceptions(input: ByteReadChannel, request: HttpRequestData): ByteReadChannel {
+    val replacementChannel = ByteChannelWithMappedExceptions(request)
+
+    writer(coroutineContext, replacementChannel) {
+        try {
+            input.joinTo(replacementChannel, closeOnEnd = true)
+        } catch (cause: Throwable) {
+            input.cancel(cause)
+        }
+    }
+
+    return replacementChannel
+}
+
+/**
+ * Returns [ByteWriteChannel] with [ByteChannel.close] handler that returns [SocketTimeoutException] instead of
+ * [SocketTimeoutException].
+ */
+@InternalAPI
+fun CoroutineScope.mapEngineExceptions(input: ByteWriteChannel, request: HttpRequestData): ByteWriteChannel {
+    val replacementChannel = ByteChannelWithMappedExceptions(request)
+
+    writer(coroutineContext, replacementChannel) {
+        try {
+            replacementChannel.joinTo(input, closeOnEnd = true)
+        } catch (cause: Throwable) {
+            replacementChannel.close(cause)
+        }
+    }
+
+    return replacementChannel
+}
+
+/**
+ * Creates [ByteChannel] that maps close exceptions (close the channel with [SocketTimeoutException] if asked to
+ * close it with [SocketTimeoutException]).
+ */
+internal expect fun ByteChannelWithMappedExceptions(request: HttpRequestData): ByteChannel

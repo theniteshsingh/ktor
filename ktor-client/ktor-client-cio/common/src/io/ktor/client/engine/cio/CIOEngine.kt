@@ -7,10 +7,10 @@ package io.ktor.client.engine.cio
 import io.ktor.client.engine.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
+import io.ktor.client.request.port
 import io.ktor.client.utils.*
 import io.ktor.http.*
 import io.ktor.network.selector.*
-import io.ktor.util.*
 import io.ktor.network.util.*
 import io.ktor.util.*
 import io.ktor.util.collections.*
@@ -25,7 +25,9 @@ internal class CIOEngine(
         preventFreeze()
     }
 
-    override val dispatcher by lazy { Dispatchers.clientDispatcher(config.threadsCount, "ktor-cio-dispatcher") }
+    override val dispatcher by lazy {
+        Dispatchers.clientDispatcher(config.threadsCount, "ktor-cio-dispatcher")
+    }
 
     override val supportedCapabilities = setOf(HttpTimeout)
 

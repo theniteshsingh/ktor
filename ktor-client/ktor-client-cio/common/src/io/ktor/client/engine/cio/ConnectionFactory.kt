@@ -6,8 +6,8 @@ package io.ktor.client.engine.cio
 
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
-import kotlinx.coroutines.sync.*
 import io.ktor.network.util.*
+import kotlinx.coroutines.sync.*
 
 internal class ConnectionFactory(
     private val selector: SelectorManager,
