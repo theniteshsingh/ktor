@@ -115,7 +115,7 @@ class CookiesTest : ClientLoader() {
     }
 
     @Test
-    fun testWithLeadingDot() = clientTests(listOf("Js")) {
+    fun testWithLeadingDot() = clientTests(listOf("Js", "iOS")) {
         config {
             install(HttpCookies)
         }
