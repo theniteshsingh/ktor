@@ -4,7 +4,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.*
 
 /**
- * A selectable entity with selectable NIO [channel], [interestedOps] subscriptions
+ * A selectable entity with selectable NIO [channel], [interestedOps] subscriptions.
  */
 @KtorExperimentalAPI
 expect interface Selectable

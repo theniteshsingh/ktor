@@ -4,7 +4,7 @@
 
 package io.ktor.network.sockets
 
-import io.ktor.network.util.*
+private const val INFINITE_TIMEOUT_MS = Long.MAX_VALUE
 
 /**
  * Socket options builder

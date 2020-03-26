@@ -96,7 +96,7 @@ class HttpTimeout(
          * Infinite timeout in milliseconds.
          */
         @SharedImmutable
-        const val INFINITE_TIMEOUT_MS = Long.MAX_VALUE
+        public const val INFINITE_TIMEOUT_MS = Long.MAX_VALUE
 
         override fun prepare(block: HttpTimeoutCapabilityConfiguration.() -> Unit): HttpTimeout =
             HttpTimeoutCapabilityConfiguration().apply(block).build()

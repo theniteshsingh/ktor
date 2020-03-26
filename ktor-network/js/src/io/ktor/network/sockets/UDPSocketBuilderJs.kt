@@ -13,7 +13,7 @@ internal actual fun UDPSocketBuilder.Companion.connectUDP(
     localAddress: NetworkAddress?,
     options: SocketOptions.UDPSocketOptions
 ): ConnectedDatagramSocket {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    error("UDP sockets are unsupported on JS platform")
 }
 
 internal actual fun UDPSocketBuilder.Companion.bindUDP(
@@ -21,5 +21,5 @@ internal actual fun UDPSocketBuilder.Companion.bindUDP(
     localAddress: NetworkAddress?,
     options: SocketOptions.UDPSocketOptions
 ): BoundDatagramSocket {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    error("UDP sockets are unsupported on JS platform")
 }

@@ -11,7 +11,7 @@ import kotlin.coroutines.*
 
 @InternalAPI
 actual fun SelectorManager(dispatcher: CoroutineContext): SelectorManager {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    error("Selector manager is unsupported on JS platform")
 }
 
 @InternalAPI

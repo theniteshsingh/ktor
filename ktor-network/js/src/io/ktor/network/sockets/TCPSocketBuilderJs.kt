@@ -12,7 +12,7 @@ internal actual suspend fun TCPSocketBuilder.Companion.connect(
     networkAddress: NetworkAddress,
     socketOptions: SocketOptions.TCPClientSocketOptions
 ): Socket {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    error("TCP sockets are unsupported on js platform")
 }
 
 internal actual fun TCPSocketBuilder.Companion.bind(
@@ -20,5 +20,5 @@ internal actual fun TCPSocketBuilder.Companion.bind(
     localAddress: NetworkAddress?,
     socketOptions: SocketOptions.AcceptorOptions
 ): ServerSocket {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    error("TCP sockets are unsupported on js platform")
 }
