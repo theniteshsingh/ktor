@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 
 class TestTracer : Tracer {
-
     val requestWillBeSentCalls = mutableListOf<RequestWillBeSentCall>()
     val responseHeadersReceivedCalls = mutableListOf<ResponseHeadersReceivedCall>()
     val interpretResponseCalls = mutableListOf<InterpretResponseCall>()

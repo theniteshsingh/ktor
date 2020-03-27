@@ -7,9 +7,9 @@ internal class KtorInspectorWebSocketResponse(
     private val requestId: String,
     private val requestData: HttpRequestData,
     private val responseData: HttpResponseData
-) : NetworkEventReporter.InspectorWebSocketResponse, NetworkEventReporter.InspectorHeaders by KtorInterceptorHeaders(
-    responseData.headers
-) {
+) : NetworkEventReporter.InspectorWebSocketResponse,
+    NetworkEventReporter.InspectorHeaders by KtorInterceptorHeaders(responseData.headers) {
+
     override fun requestId(): String {
         return requestId
     }

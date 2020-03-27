@@ -12,7 +12,10 @@ import java.util.*
  * Implementation of [NetworkEventReporter.InspectorHeaders] to be reused in [KtorInterceptorRequest] and
  * [KtorInterceptorResponse]. Uses provided Ktor [Headers] as a source of HTTP headers.
  */
-internal class KtorInterceptorHeaders(private val headers: Headers) : NetworkEventReporter.InspectorHeaders {
+internal class KtorInterceptorHeaders(
+    private val headers: Headers
+) : NetworkEventReporter.InspectorHeaders {
+
     /**
      * Ordered list of header names to be used to get index-based access to headers.
      */

@@ -26,7 +26,7 @@ interface Tracer {
     /**
      * Wraps input channel to pass it to underlying implementation.
      */
-    fun interpretResponse(requestId: String, contentType: String?, contentEncoding: String?, body: Any?) : Any?
+    fun interpretResponse(requestId: String, contentType: String?, contentEncoding: String?, body: Any?): Any?
 
     /**
      * Indicates that communication with the server has failed.
@@ -51,7 +51,11 @@ interface Tracer {
     /**
      * Delivers the reply from the peer in response to the WebSocket upgrade request.
      */
-    fun webSocketHandshakeResponseReceived(requestId: String, requestData: HttpRequestData, responseData: HttpResponseData)
+    fun webSocketHandshakeResponseReceived(
+        requestId: String,
+        requestData: HttpRequestData,
+        responseData: HttpResponseData
+    )
 
     /**
      * Send a "websocket" frame from our app to the remote peer.

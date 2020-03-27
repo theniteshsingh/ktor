@@ -11,10 +11,11 @@ import io.ktor.http.content.*
 /**
  * Implementation of [NetworkEventReporter.InspectorRequest] that is built to work with [StethoTracer].
  */
-internal class KtorInterceptorRequest(private val requestId: String, private val requestData: HttpRequestData) :
-    NetworkEventReporter.InspectorRequest, NetworkEventReporter.InspectorHeaders by KtorInterceptorHeaders(
-    requestData.headers
-) {
+internal class KtorInterceptorRequest(
+    private val requestId: String,
+    private val requestData: HttpRequestData
+) : NetworkEventReporter.InspectorRequest,
+    NetworkEventReporter.InspectorHeaders by KtorInterceptorHeaders(requestData.headers) {
 
     override fun id(): String {
         return requestId
@@ -28,14 +29,12 @@ internal class KtorInterceptorRequest(private val requestId: String, private val
         return null
     }
 
-    override fun body(): ByteArray? {
-        return when (val body = requestData.body) {
-            is OutgoingContent.NoContent -> null
-            is OutgoingContent.ProtocolUpgrade -> null
-            is OutgoingContent.ReadChannelContent -> error("Stetho tracer does not support ReadChannelContent")
-            is OutgoingContent.WriteChannelContent -> error("Stetho tracer does not support WriteChannelContent")
-            is OutgoingContent.ByteArrayContent -> body.bytes()
-        }
+    override fun body(): ByteArray? = when (val body = requestData.body) {
+        is OutgoingContent.NoContent -> null
+        is OutgoingContent.ProtocolUpgrade -> null
+        is OutgoingContent.ReadChannelContent -> error("Stetho tracer does not support ReadChannelContent")
+        is OutgoingContent.WriteChannelContent -> error("Stetho tracer does not support WriteChannelContent")
+        is OutgoingContent.ByteArrayContent -> body.bytes()
     }
 
     override fun url(): String {

@@ -7,8 +7,11 @@ package io.ktor.client.features.tracing
 import com.facebook.stetho.inspector.network.*
 import io.ktor.http.cio.websocket.*
 
-internal class KtorInspectorWebSocketFrame(private val requestId: String, private val frame: Frame) :
-    NetworkEventReporter.InspectorWebSocketFrame {
+internal class KtorInspectorWebSocketFrame(
+    private val requestId: String,
+    private val frame: Frame
+) : NetworkEventReporter.InspectorWebSocketFrame {
+
     override fun requestId(): String {
         return requestId
     }
