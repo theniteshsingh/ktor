@@ -2,9 +2,10 @@
  * Copyright 2014-2020 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
+package io.ktor.client.features.tracing
+
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.features.tracing.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
@@ -16,7 +17,8 @@ import kotlinx.coroutines.*
  * Engine with tracer that wraps request execution into tracing functionality. Calls correspondent [tracer] method on
  * every important processing event.
  */
-internal class EngineWithTracer(
+@InternalAPI
+class EngineWithTracer(
     private val delegate: HttpClientEngine,
     private val tracer: Tracer
 ) : HttpClientEngine by delegate {

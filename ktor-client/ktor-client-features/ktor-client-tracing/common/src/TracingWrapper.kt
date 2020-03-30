@@ -4,7 +4,6 @@
 
 package io.ktor.client.features.tracing
 
-import EngineWithTracer
 import io.ktor.client.engine.*
 
 /**

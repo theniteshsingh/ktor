@@ -20,10 +20,12 @@ class TestTracer : Tracer {
     val webSocketClosedCalls = mutableListOf<WebSocketClosedCall>()
 
     override fun requestWillBeSent(requestId: String, requestData: HttpRequestData) {
-        requestWillBeSentCalls += RequestWillBeSentCall(
-            requestId,
-            requestData
-        )
+        synchronized(this) {
+            requestWillBeSentCalls += RequestWillBeSentCall(
+                requestId,
+                requestData
+            )
+        }
     }
 
     override fun responseHeadersReceived(
@@ -31,11 +33,13 @@ class TestTracer : Tracer {
         requestData: HttpRequestData,
         responseData: HttpResponseData
     ) {
-        responseHeadersReceivedCalls += ResponseHeadersReceivedCall(
-            requestId,
-            requestData,
-            responseData
-        )
+        synchronized(this) {
+            responseHeadersReceivedCalls += ResponseHeadersReceivedCall(
+                requestId,
+                requestData,
+                responseData
+            )
+        }
     }
 
     override fun interpretResponse(
@@ -44,26 +48,33 @@ class TestTracer : Tracer {
         contentEncoding: String?,
         body: Any?
     ): Any? {
-        interpretResponseCalls += InterpretResponseCall(
-            requestId,
-            contentType,
-            contentEncoding,
-            body
-        )
-        return body
+        synchronized(this) {
+            interpretResponseCalls += InterpretResponseCall(
+                requestId,
+                contentType,
+                contentEncoding,
+                body
+            )
+            return body
+        }
     }
 
     override fun httpExchangeFailed(requestId: String, message: String) {
-        httpExchangeFailedCalls += HttpExchangeFailedCall(
-            requestId,
-            message
-        )
+        synchronized(this) {
+            httpExchangeFailedCalls += HttpExchangeFailedCall(
+                requestId,
+                message
+            )
+        }
     }
 
     override fun responseReadFinished(requestId: String) {
-        responseReadFinishedCalls += ResponseReadFinishedCall(
-            requestId
-        )
+        synchronized(this) {
+            responseReadFinishedCalls += ResponseReadFinishedCall(
+                requestId
+            )
+            println("Done? [size is ${responseReadFinishedCalls.size}]")
+        }
     }
 
     override fun webSocketCreated(requestId: String, url: String) {

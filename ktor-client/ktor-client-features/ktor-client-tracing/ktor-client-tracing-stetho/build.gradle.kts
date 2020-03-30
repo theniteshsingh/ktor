@@ -34,10 +34,21 @@ kotlin {
 
     sourceSets {
         val androidMain by getting {
+            kotlin.srcDir("android/src")
             dependencies {
                 implementation(project(":ktor-client:ktor-client-features:ktor-client-tracing"))
                 implementation(project(":ktor-client:ktor-client-core"))
                 implementation("com.facebook.stetho:stetho:$android_stetho_version")
+            }
+        }
+
+        val androidTest by getting {
+            kotlin.srcDir("android/test")
+            dependencies {
+                implementation(project(":ktor-client:ktor-client-cio"))
+                implementation(kotlin("test"))
+                implementation(kotlin("test-junit"))
+                implementation("org.mockito:mockito-core:3.3.3")
             }
         }
     }
@@ -71,4 +82,9 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+    }
+    useLibrary("android.test.mock")
 }

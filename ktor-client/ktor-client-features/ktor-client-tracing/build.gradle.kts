@@ -4,4 +4,9 @@ kotlin.sourceSets {
             api(project(":ktor-client:ktor-client-core"))
         }
     }
+    jvmTest {
+        dependencies {
+            implementation(project(":ktor-client:ktor-client-cio"))
+        }
+    }
 }

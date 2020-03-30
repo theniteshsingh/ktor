@@ -2,7 +2,9 @@
  * Copyright 2014-2020 JetBrains s.r.o and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
+import io.ktor.client.*
 import io.ktor.client.engine.*
+import io.ktor.client.engine.cio.*
 import io.ktor.client.features.tracing.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -17,6 +19,38 @@ import org.junit.*
 import kotlin.coroutines.*
 
 class TracingWrapperTest {
+    @Test
+    fun testGet() = runBlocking {
+        val tracer = TestTracer()
+        HttpClient(TracingWrapper(CIO, tracer)).use { client ->
+            val result: String = client.get("http://www.google.com/")
+            assertNotNull(result)
+        }
+
+        synchronized(tracer) {
+            assertEquals(1, tracer.requestWillBeSentCalls.size)
+            assertEquals(1, tracer.responseHeadersReceivedCalls.size)
+            assertEquals(1, tracer.interpretResponseCalls.size)
+
+            val expectedRequestId = tracer.requestWillBeSentCalls[0].requestId
+
+            with(tracer.requestWillBeSentCalls[0]) {
+                assertEquals(HttpMethod.Get, requestData.method)
+                assertEquals("http://www.google.com/", requestData.url.toString())
+                assertEquals(expectedRequestId, requestId)
+            }
+
+            with(tracer.responseHeadersReceivedCalls[0]) {
+                assertEquals(HttpStatusCode.OK, responseData.statusCode)
+                assertEquals(expectedRequestId, requestId)
+            }
+
+            with(tracer.interpretResponseCalls[0]) {
+                assertEquals(expectedRequestId, requestId)
+            }
+        }
+    }
+
     @Test
     fun testOutgoingChannelTracerOffer() = runBlocking {
         val channel = Channel<Frame>(Channel.Factory.UNLIMITED)
