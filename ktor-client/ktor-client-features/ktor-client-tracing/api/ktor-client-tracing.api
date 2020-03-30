@@ -1,3 +1,14 @@
+public final class io/ktor/client/features/tracing/EngineWithTracer : io/ktor/client/engine/HttpClientEngine {
+	public fun <init> (Lio/ktor/client/engine/HttpClientEngine;Lio/ktor/client/features/tracing/Tracer;)V
+	public fun close ()V
+	public fun execute (Lio/ktor/client/request/HttpRequestData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getConfig ()Lio/ktor/client/engine/HttpClientEngineConfig;
+	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	public fun getDispatcher ()Lkotlinx/coroutines/CoroutineDispatcher;
+	public fun getSupportedCapabilities ()Ljava/util/Set;
+	public fun install (Lio/ktor/client/HttpClient;)V
+}
+
 public abstract interface class io/ktor/client/features/tracing/Tracer {
 	public abstract fun httpExchangeFailed (Ljava/lang/String;Ljava/lang/String;)V
 	public abstract fun interpretResponse (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
